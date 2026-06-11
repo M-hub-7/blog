@@ -60,6 +60,16 @@ test('add new blog', async () => {
   assert.strictEqual(response.body.length, initialBlog.length + 1)
 })
 
+test('verification of like proprieties', async () => {
+  const newblogs = {
+    title: 'bienvenu sur mon nouveau blog',
+    author: 'mfendem daina',
+    url: 'http://mfendemdaina.com',
+  }
+  const response = await api.post('/api/blogs').send(newblogs).expect(201)
+  assert.strictEqual(response.body.likes, undefined)
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
