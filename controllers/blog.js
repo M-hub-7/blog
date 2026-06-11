@@ -17,21 +17,17 @@ blogRouter.get('/:id', (request, response, next) => {
     .catch((error) => next(error))
 })
 
-blogRouter.post('/', (request, response, next) => {
+blogRouter.post('/', async (request, response) => {
   const body = request.body
   const blog = new Blog({
-    tittle: body.tittle,
+    title: body.title,
     author: body.author,
     url: body.url,
     likes: body.likes,
   })
 
-  blog
-    .save()
-    .then((blogsaved) => {
-      response.json(blogsaved)
-    })
-    .catch((error) => next(error))
+  const result = await blog.save()
+  response.status(201).json(result)
 })
 
 blogRouter.delete('/:id', (request, response, next) => {
