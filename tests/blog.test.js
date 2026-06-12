@@ -91,6 +91,21 @@ describe('delection of blog', () => {
   })
 })
 
+test('update of blog', async () => {
+  const nlikes = 100
+
+  const blogToStar = await helper.blogInDb()
+  const blogToUpdate = blogToStar[0]
+  blogToUpdate.likes = nlikes
+
+  await api.put(`/api/blogs/${blogToUpdate.id}`)
+  const blogAtEnd = await helper.blogInDb()
+  const likes = blogAtEnd.map((n) => n.likes)
+
+  assert(!likes.includes(blogToUpdate.title))
+  assert.strictEqual(blogAtEnd.length, helper.initialBlog.length)
+})
+
 after(async () => {
   await mongoose.connection.close()
 })

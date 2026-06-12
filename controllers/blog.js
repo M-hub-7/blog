@@ -44,10 +44,7 @@ blogRouter.put('/:id', (request, response, next) => {
         return response.status(404).end()
       }
 
-      ;((blog.tittle = body.tittle),
-        (blog.author = body.author),
-        (blog.url = body.url),
-        (blog.likes = body.likes),
+      ;((blog.likes = body.likes),
         blog.save().then((updatedBlog) => {
           return response.json(updatedBlog)
         }))
