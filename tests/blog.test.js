@@ -1,30 +1,16 @@
-const { test, after, beforeEach } = require('node:test')
+const { test, after, beforeEach, describe } = require('node:test')
 const supertest = require('supertest')
 const mongoose = require('mongoose')
 const app = require('../app')
+const helper = require('./help_test')
 const Blog = require('../models/blog')
 const assert = require('node:assert')
 
 const api = supertest(app)
 
-const initialBlog = [
-  {
-    title: 'mon blog de test',
-    author: 'camine queen',
-    url: 'caminequeen@gmail.com',
-    likes: 20,
-  },
-  {
-    title: 'mon blog de test',
-    author: 'camine queen',
-    url: 'caminequeen@gmail.com',
-    likes: 20,
-  },
-]
-
 beforeEach(async () => {
   await Blog.deleteMany({})
-  await Promise.all(initialBlog.map((blog) => new Blog(blog).save()))
+  await Promise.all(helper.initialBlog.map((blog) => new Blog(blog).save()))
 })
 
 test('note are retourned as json', async () => {
@@ -60,7 +46,7 @@ test('add new blog', async () => {
 
   const title = response.body.map((e) => e.title)
   assert(title.includes('bienvenu sur mon nouveau blog'))
-  assert.strictEqual(response.body.length, initialBlog.length + 1)
+  assert.strictEqual(response.body.length, helper.initialBlog.length + 1)
 })
 
 test('new block without url and title', async () => {
@@ -77,7 +63,7 @@ test('new block without url and title', async () => {
 
   const response = await api.get('/api/blogs')
 
-  assert.strictEqual(response.body.length, initialBlog.length)
+  assert.strictEqual(response.body.length, helper.initialBlog.length)
 })
 
 test('verification of like proprieties', async () => {
@@ -89,6 +75,20 @@ test('verification of like proprieties', async () => {
   const response = await api.post('/api/blogs').send(newblogs).expect(201)
 
   assert.strictEqual(response.body.likes, 0)
+})
+describe('delection of blog', () => {
+  test('succeeds with status 204 if id is valid', async () => {
+    const blogAtStart = await helper.blogInDb()
+    const blogToDelete = blogAtStart[0]
+
+    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+
+    const blogAtEnd = await helper.blogInDb()
+
+    const titles = blogAtEnd.map((n) => n.title)
+    assert(!titles.includes(blogToDelete.title))
+    assert.strictEqual(blogAtEnd.length, helper.initialBlog.length - 1)
+  })
 })
 
 after(async () => {
